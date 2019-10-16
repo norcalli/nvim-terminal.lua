@@ -25,6 +25,8 @@ be included.
 lua require'terminal'.setup()
 ```
 
+Then you can just `setl filetype=terminal` to activate the mode.
+
 For more advanced usage, see the [Luadoc documentation](https://norcalli.github.io/luadoc/nvim-terminal.lua/)
 or use `:h terminal.lua` once installed.
 
@@ -33,3 +35,4 @@ or use `:h terminal.lua` once installed.
 
 - [ ] Add underline, italic, and other code modes.
 - [ ] Look into further performance improvements by eliminating work.
+- [ ] See if I can get fenced blocks to work in `markdown` mode.
