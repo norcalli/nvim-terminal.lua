@@ -17,37 +17,57 @@ LUA API DEFINITION                                          *terminal-lua-api*
 
 Assumes the module is imported as `terminal`
 
-terminal.highlight_buffer                          *terminal.highlight_buffer*
+|terminal.setup|                                               *terminal.setup*
+
+Easy to use function if you want the full setup without fine grained control.
+Establishes an autocmd for `FileType terminal` .
+
+Also sets |'nowrap'|and |'concealcursor'|="nc"
+
+PARAMETERS:
+	`rgb_color_table`	 (optional) cterm color RGB lookup table
+>
+  terminal.setup([rgb_color_table=initialize_terminal_colors()])
+
+  " In your VIMRC
+  lua require'terminal'.setup()
+<
+
+|terminal.highlight_buffer|                          *terminal.highlight_buffer*
 
 Highlight starting from `line_start` (0-indexed) for each line described by `lines` in the
 buffer `buf` and attach it to the namespace `ns`.
 
-parameters:
-	buf	 buffer id.
-	ns	 the namespace id. Create it with `vim.api.create_namespace`
-	lines	 the lines to highlight from the buffer.
-	line_start	 should be 0-indexed
+PARAMETERS:
+	`buf`	 buffer id.
+	`ns`	 the namespace id. Create it with `vim.api.create_namespace`
+	`lines`	 the lines to highlight from the buffer.
+	`line_start`	 should be 0-indexed
+	`rgb_color_table`	 (optional) cterm color RGB lookup table
 >
-  terminal.highlight_buffer(buf[, ns=DEFAULT_NAMESPACE], lines, line_start)
+  terminal.highlight_buffer(buf[, ns=DEFAULT_NAMESPACE], lines, line_start[, rgb_color_table=initialize_terminal_colors()])
 <
 
-terminal.attach_to_buffer                          *terminal.attach_to_buffer*
+|terminal.attach_to_buffer|                          *terminal.attach_to_buffer*
 
 Attach to a buffer and continuously highlight changes.
 
-parameters:
-	buf	 A value of 0 implies the current buffer.
+PARAMETERS:
+	`buf`	 A value of 0 implies the current buffer.
+	`rgb_color_table`	 (optional) cterm color RGB lookup table
 >
-  terminal.attach_to_buffer(buf)
+  terminal.attach_to_buffer(buf[, rgb_color_table=initialize_terminal_colors()])
 <
 
-terminal.setup                                               *terminal.setup*
+|terminal.initialize_terminal_colors|     *terminal.initialize_terminal_colors*
 
-Easy to use function if you want the full setup without fine grained control.
-Establishes an autocmd for `FileType terminal`
+Return a lookup table from [0,255] to an RGB color. Respects
+`g:terminal_color_n`.  See |terminal| for more description on that.
+
+RETURNS:
+	{[number]=string} table from the cterm number to hex string
 >
-  " In your VIMRC
-  lua require'terminal'.setup()
+  local cterm_to_rgb = terminal.initialize_terminal_colors()
 <
 
  vim:tw=78:ts=8:noet:ft=help:norl:

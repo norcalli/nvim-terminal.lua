@@ -2,7 +2,7 @@
 -- @module terminal
 local nvim = require 'nvim'
 
-local function array_to_rgb_hex(r,g,b)
+local function rgb_to_hex(r,g,b)
 	return ("#%02X%02X%02X"):format(r,g,b)
 end
 
@@ -11,20 +11,55 @@ local cterm_colors = {
 	"#000000", "#AA0000", "#00AA00", "#AA5500", "#0000AA", "#AA00AA", "#00AAAA", "#AAAAAA",
 	"#555555", "#FF5555", "#55FF55", "#FFFF55", "#5555FF", "#FF55FF", "#55FFFF", "#FFFFFF"
 }
-
-local termguicolors = nvim.o.termguicolors
-local function resolve_cterm_rgb(cterm)
-	if termguicolors then
-		return nvim.g["terminal_color_"..cterm] or cterm_colors[cterm]
+local function cube6(v)
+	return v == 0 and v or (v*40 + 55)
+end
+-- https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
+for b = 0, 5 do
+	for g = 0, 5 do
+		for r = 0, 5 do
+			local i = 16 + 36*r + 6*g + b
+			-- Some terminals implement this differently
+			-- cterm_colors[i] = rgb_to_hex(51*r,51*g,51*b)
+			cterm_colors[i] = rgb_to_hex(cube6(r),cube6(g),cube6(b))
+		end
 	end
-	return cterm_colors[cterm]
+end
+for i = 0, 23 do
+	local v = 8 + (i * 10)
+	cterm_colors[232+i] = rgb_to_hex(v,v,v)
+end
+
+--- Return a lookup table from [0,255] to an RGB color.
+-- Respects g:terminal_color_n
+-- @treturn {[number]=string} number to hex string
+local function initialize_terminal_colors()
+	local result = {}
+	for i = 0, 255 do
+		result[i] = cterm_colors[i]
+	end
+	-- g:terminal_color_n overrides
+	if nvim.o.termguicolors then
+		-- TODO only do 16 colors?
+		for i = 0, 255 do
+			local status, value = pcall(vim.api.nvim_get_var, 'terminal_color_'..i)
+			if status then
+				result[i] = value
+			else
+				-- TODO assume contiguous and break early?
+				break
+			end
+		end
+	end
+	return result
 end
 
 --- Parses a list of codes into an object of cterm/gui attributes
+-- @tparam {[number]=string} rgb_color_table cterm color RGB lookup table
 -- @tparam {string|int,...} attrs the list of codes numbers like 0 from ^[[0m
 -- @tparam[opt={}] {[string]=string} attributes mutable table to output results into
 -- @treturn {[string]=string} a table of cterm*/gui* attributes
-local function resolve_attributes(attrs, attributes)
+local function resolve_attributes(rgb_color_table, attrs, attributes)
 	attributes = attributes or {}
 	for _, v in ipairs(attrs) do
 		v = tonumber(v)
@@ -37,22 +72,22 @@ local function resolve_attributes(attrs, attributes)
 			-- Foreground color
 			local ctermfg = v-30
 			attributes.ctermfg = ctermfg
-			attributes.guifg = resolve_cterm_rgb(ctermfg)
+			attributes.guifg = rgb_color_table[ctermfg]
 		elseif v >= 40 and v <= 47 then
 			-- Background color
 			local ctermbg = v-40
 			attributes.ctermbg = ctermbg
-			attributes.guibg = resolve_cterm_rgb(ctermbg)
+			attributes.guibg = rgb_color_table[ctermbg]
 		elseif v >= 90 and v <= 97 then
 			-- Bright colors. Foreground
 			local ctermfg = v-90+8
 			attributes.ctermfg = ctermfg
-			attributes.guifg = resolve_cterm_rgb(ctermfg)
+			attributes.guifg = rgb_color_table[ctermfg]
 		elseif v >= 100 and v <= 107 then
 			-- Bright colors. Background
 			local ctermbg = v-100+8
 			attributes.ctermbg = ctermbg
-			attributes.guibg = resolve_cterm_rgb(ctermbg)
+			attributes.guibg = rgb_color_table[ctermbg]
 		elseif v == 22 then
 			attributes.cterm = 'NONE'
 			attributes.gui = 'NONE'
@@ -156,12 +191,14 @@ end
 
 --- Parse a color code inner
 -- Either an RGB code or an incremental list of other CSI codes.
-local function parse_color_code(code, current_attributes)
+local function parse_color_code(rgb_color_table, code, current_attributes)
 	if code:match("^[34]8[:;]5[:;]") then
 		local kind, sep1, sep2, n = code:match("^([34])8([:;])5([:;])(%d+)$")
 		-- TODO do this better
 		assert(sep1 == sep2)
-		current_attributes[kind == "3" and "ctermfg" or "ctermbg"] = tonumber(n)
+		local ctermnr = tonumber(n)
+		current_attributes[kind == "3" and "ctermfg" or "ctermbg"] = ctermnr
+		current_attributes[kind == "3" and "guifg" or "guibg"] = rgb_color_table[ctermnr]
 	elseif code:match("^[34]8[:;]2[:;]") then
 		local kind, sep1, sep2, r, sep3, g, sep4, b = code:match("^([34])8([:;])2([:;])(%d+)([:;])(%d+)([:;])(%d+)$")
 		-- TODO do this better
@@ -170,7 +207,7 @@ local function parse_color_code(code, current_attributes)
 		current_attributes[kind == "3" and "guifg" or "guibg"] = "#"..r..g..b
 	else
 		local parts = vim.split(code, ";", true)
-		current_attributes = resolve_attributes(parts, current_attributes)
+		current_attributes = resolve_attributes(rgb_color_table, parts, current_attributes)
 	end
 	return current_attributes
 end
@@ -205,20 +242,24 @@ end
 @tparam[opt=DEFAULT_NAMESPACE] integer ns the namespace id. Create it with `vim.api.create_namespace`
 @tparam {string,...} lines the lines to highlight from the buffer.
 @tparam integer line_start should be 0-indexed
+@tparam[opt=initialize_terminal_colors()] {[number]=string} rgb_color_table cterm color RGB lookup table
 ]]
-local function highlight_buffer(buf, ns, lines, line_start)
+local function highlight_buffer(buf, ns, lines, line_start, rgb_color_table)
+	rgb_color_table = rgb_color_table or initialize_terminal_colors()
 	ns = ns or DEFAULT_NAMESPACE
-	-- Algorithm overview:
-	-- Maintain an attributes object which contains the currently applicable
-	-- style to apply based on the incremental definitions from CSI codes.
-	--
-	-- 1. Start with a bare attributes object which represents a Normal style.
-	-- 2. Scan for the next CSI color code.
-	-- 3. Apply a highlight on the region between the last CSI code and this new
-	-- one. based on the current attributes.
-	-- 4. Update the current attributes with those defined by the new CSI code.
-	-- 5. Repeat from 2
-	local current_region_start, current_attributes = nil, nil
+	--[[
+	Algorithm overview:
+	Maintain an attributes object which contains the currently applicable
+	style to apply based on the incremental definitions from CSI codes.
+
+	1. Start with a bare attributes object which represents a Normal style.
+	2. Scan for the next CSI color code.
+	3. Apply a highlight on the region between the last CSI code and this new
+	one. based on the current attributes.
+	4. Update the current attributes with those defined by the new CSI code.
+	5. Repeat from 2
+	]]
+	local current_region_start, current_attributes = nil, {}
 	for current_linenum, line in ipairs(lines) do
 		-- @todo it's possible to skip processing the new code if the attributes hasn't changed.
 		current_linenum = current_linenum - 1 + line_start
@@ -232,7 +273,7 @@ local function highlight_buffer(buf, ns, lines, line_start)
 			end
 			current_region_start = {current_linenum, match_start}
 			-- Update attributes from the new escape code.
-			current_attributes = parse_color_code(code, current_attributes)
+			current_attributes = parse_color_code(rgb_color_table, code, current_attributes)
 		end
 	end
 	if current_region_start then
@@ -244,8 +285,10 @@ end
 
 --- Attach to a buffer and continuously highlight changes.
 -- @tparam integer buf A value of 0 implies the current buffer.
+-- @tparam[opt=initialize_terminal_colors()] {[number]=string} rgb_color_table cterm color RGB lookup table
 -- @see highlight_buffer
-local function attach_to_buffer(buf)
+local function attach_to_buffer(buf, rgb_color_table)
+	rgb_color_table = rgb_color_table or initialize_terminal_colors()
 	local ns = DEFAULT_NAMESPACE
 --	local ns = nvim.create_namespace 'terminal_highlight'
 	do
@@ -271,11 +314,14 @@ end
 
 --- Easy to use function if you want the full setup without fine grained control.
 -- Establishes an autocmd for `FileType terminal`
+-- @tparam[opt=initialize_terminal_colors()] {[number]=string} rgb_color_table cterm color RGB lookup table
 -- @usage require'terminal'.setup()
-local function setup()
+local function setup(rgb_color_table)
+	rgb_color_table = rgb_color_table or initialize_terminal_colors()
 	function TERMINAL_SETUP_HOOK()
 		nvim.win_set_option(0, 'concealcursor', 'nc')
-		attach_to_buffer(nvim.get_current_buf())
+		nvim.win_set_option(0, 'wrap', false)
+		attach_to_buffer(nvim.get_current_buf(), rgb_color_table)
 	end
 	nvim.ex.augroup("TerminalSetup")
 	nvim.ex.autocmd_()
@@ -289,6 +335,7 @@ return {
 	setup = setup;
 	attach_to_buffer = attach_to_buffer;
 	highlight_buffer = highlight_buffer;
+	initialize_terminal_colors = initialize_terminal_colors;
 }
 
 --[=[ Example:
