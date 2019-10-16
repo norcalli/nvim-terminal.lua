@@ -1,0 +1,216 @@
+vim:ft=terminal
+
+> monki@1.0.0 start /home/ashkan/works/monki/frontend
+> webpack src/index.js --color --output bin/app.js -d --watch
+
+Hash: [1m9ab2789b6e83dcf7b7da[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m245[39m[22mms
+Built at: 10/15/2019 [1m3:27:05 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[./node_modules/webpack/buildin/global.js] [1m(webpack)/buildin/global.js[39m[22m 472 bytes {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+[[1m./src/hotload.js[39m[22m] 1.46 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+[[1m./src/index.js[39m[22m] 2.56 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 26 hidden modules
+Hash: [1m1b20289bbedf50a96a39[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m29[39m[22mms
+Built at: 10/15/2019 [1m3:32:24 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/hotload.js[39m[22m] 1.46 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1mb2e6703aa54b071d6c8e[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m21[39m[22mms
+Built at: 10/15/2019 [1m3:41:17 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/hotload.js[39m[22m] 1.54 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m0b4f48ef02865068ae06[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m23[39m[22mms
+Built at: 10/15/2019 [1m3:42:58 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/hotload.js[39m[22m] 1.56 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1me6e37b8e09922e81c0c2[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m25[39m[22mms
+Built at: 10/15/2019 [1m3:48:22 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.57 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m55511e99ffcbfe0465f1[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m26[39m[22mms
+Built at: 10/15/2019 [1m3:48:49 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.57 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m645af98f625600eba568[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m23[39m[22mms
+Built at: 10/15/2019 [1m3:49:06 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.58 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1mdad131903c1f941aae82[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m22[39m[22mms
+Built at: 10/15/2019 [1m3:49:10 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.57 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m1e1b4ba8c1d9031263a7[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m26[39m[22mms
+Built at: 10/15/2019 [1m3:49:14 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.58 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m9a273cbed7af358cfdc6[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m31[39m[22mms
+Built at: 10/15/2019 [1m3:49:34 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.58 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m58feaa7a4882398265c1[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m15[39m[22mms
+Built at: 10/15/2019 [1m3:49:43 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.58 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m0306868922a4adaad807[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m16[39m[22mms
+Built at: 10/15/2019 [1m3:49:52 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.59 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m0e496b5fa1052d508b09[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m22[39m[22mms
+Built at: 10/15/2019 [1m3:49:56 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.59 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m0306868922a4adaad807[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m12[39m[22mms
+Built at: 10/15/2019 [1m3:49:59 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.59 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m028d5e45fc829c69d4eb[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m16[39m[22mms
+Built at: 10/15/2019 [1m3:50:06 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.59 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1me4c6830ef3d74265df95[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m15[39m[22mms
+Built at: 10/15/2019 [1m3:50:11 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.59 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m0d6ef51ed82c2fe2418a[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m23[39m[22mms
+Built at: 10/15/2019 [1m3:50:14 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.58 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+Hash: [1m7d92a9a5533aac116cfd[39m[22m
+Version: webpack [1m4.41.0[39m[22m
+Time: [1m17[39m[22mms
+Built at: 10/15/2019 [1m3:50:34 AM[39m[22m
+ [1mAsset[39m[22m     [1mSize[39m[22m  [1mChunks[39m[22m  [1m[39m[22m           [1m[39m[22m[1mChunk Names[39m[22m
+[1m[32mapp.js[39m[22m  277 KiB    [1mmain[39m[22m  [1m[32m[emitted][39m[22m  main
+Entrypoint [1mmain[39m[22m = [1m[32mapp.js[39m[22m
+[[1m./src/index.js[39m[22m] 2.59 KiB {[1m[33mmain[39m[22m}[1m[32m [built][39m[22m
+    + 28 hidden modules
+
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mcdrom at /home/ashkan/Downloads/virtio-win-0.1.171.iso[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mSCSI controller scsi0 with iothread scsi_iothread0[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mraw SCSI drive scsihd0=/home/ashkan/Windows.raw, bus scsi0.0[0m
+ioctl(TUNSETIFF): Device or resource busy
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mlooking_glass with buffer of 128M at /dev/hugepages/looking-glass[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mivshmem[id=lookingglass]: /dev/hugepages/looking-glass with 128MB[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mSearching VFIO for 'NVIDIA'[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mFound 09:00.0 VGA compatible controller [0300]: NVIDIA Corporation GV100 [TITAN V] [10de:1d81] (rev a1)[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mAdding vfio-pci 09:00.0[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mFound 09:00.1 Audio device [0403]: NVIDIA Corporation Device [10de:10f2] (rev a1)[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mAdding vfio-pci 09:00.1[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mIVSHMEM_SIZE=128[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mHugePages=8256[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;31msudo qemu-system-x86_64
+-name windows10,process=windows10
+-enable-kvm
+-monitor stdio
+-spice port=5900,disable-ticketing,addr=127.0.0.1
+-machine type=q35,accel=kvm,kernel_irqchip=on
+-drive if=pflash,format=raw,readonly,file=/usr/share/ovmf/x64/OVMF_CODE.fd
+-drive media=cdrom,file=/home/ashkan/Downloads/virtio-win-0.1.171.iso,readonly
+-object iothread,id=scsi_iothread0
+-device virtio-scsi-pci,id=scsi0,iothread=scsi_iothread0
+-drive file=/home/ashkan/Windows.raw,media=disk,format=raw,snapshot=off,cache=none,if=none,id=scsihd0
+-device scsi-hd,drive=scsihd0,bus=scsi0.0
+-boot order=dc
+-serial none
+-parallel none
+-vnc none
+-rtc clock=host,base=localtime
+-m 16G
+-mem-path /dev/hugepages
+-mem-prealloc
+-cpu host,kvm=off,hv_time,hv_vendor_id=whatevs
+-smp 8,sockets=1,cores=8,threads=1
+-usb
+-netdev tap,ifname=wintap0,id=net0,br=macbr0,script=no,downscript=no
+-device virtio-net-pci,netdev=net0,id=net0,mac=DE:AD:BE:EF:AF:14
+-device ivshmem-plain,memdev=lookingglass,bus=pcie.0,addr=0C
+-object memory-backend-file,id=lookingglass,share=on,mem-path=/dev/hugepages/looking-glass,size=128M
+-device vfio-pci,host=09:00.0
+-device vfio-pci,host=09:00.1[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mSetting kvm.ignore_msrs=1 to fix windows update for EPYC processors and others.[0m
+/home/ashkan/meus/windows_virtual/run_windows.sh: [1;34mTo start VNC, use 'change vnc $address'
+	e.g. 'change vnc :5900' or 'change vnc unix:/tmp/windows10-vnc.sock'[0m
+

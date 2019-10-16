@@ -1,0 +1,45 @@
+----
+module:	[1mterminal	Highlights terminal CSI ANSI color codes.[0m
+
+
+[1mfield	DEFAULT_NAMESPACE
+[0mDefault namespace used in `highlight_buffer` and `attach_to_buffer`.
+description:
+
+ The name is "terminal_highlight"
+tags:
+		export	true
+		see	{}
+
+[1mfunction	highlight_buffer(buf[, ns=DEFAULT_NAMESPACE], lines, line_start)
+[0mHighlight the buffer region.
+description:
+
+Highlight starting from `line_start` (0-indexed) for each line described by `lines` in the
+buffer `buf` and attach it to the namespace `ns`.
+
+parameters:
+	buf	 buffer id.
+	ns	 the namespace id. Create it with `vim.api.create_namespace`
+	lines	 the lines to highlight from the buffer.
+	line_start	 should be 0-indexed
+tags:
+		static	true
+		export	true
+
+[1mfunction	attach_to_buffer(buf)
+[0mAttach to a buffer and continuously highlight changes.
+parameters:
+	buf	 A value of 0 implies the current buffer.
+tags:
+		static	true
+		export	true
+		see	{}
+
+[1mfunction	setup()
+[0mEasy to use function if you want the full setup without fine grained control.
+description:
+
+ Establishes an autocmd for `FileType terminal`
+tags:
+		export	true
