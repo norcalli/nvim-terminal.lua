@@ -9,6 +9,8 @@ highlights your buffer with the correct color codes.
 
 ![Demo](https://raw.githubusercontent.com/norcalli/github-assets/master/nvim-terminal.lua-demo.gif)
 
+![Demo.mp4](https://raw.githubusercontent.com/norcalli/github-assets/master/nvim-terminal.lua-demo.mp4)
+
 ## Installation and Usage
 
 Use your plugin manager or clone directly into your `runtimepath`.
