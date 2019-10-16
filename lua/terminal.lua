@@ -28,7 +28,8 @@ local function resolve_attributes(attrs, attributes)
 	attributes = attributes or {}
 	for _, v in ipairs(attrs) do
 		v = tonumber(v)
-		--- @todo The color codes implemented is not complete
+		-- @todo The color codes implemented is not complete
+		-- @todo cterm and gui can have multiple values for italics/things other than bold.
 		if not v then
 			-- TODO print warning here? It might be spammy.
 			-- nvim.err_writeln("Invalid mode encountered")
@@ -82,45 +83,78 @@ local function format_attributes(attributes)
 	return result
 end
 
+local HIGHLIGHT_NAME_PREFIX = "termcolorcode"
+
+--- Make a deterministic name for a highlight given these attributes
 local function make_highlight_name(attributes)
-	local keys = {}
-	for k in pairs(attributes) do table.insert(keys, k) end
-	table.sort(keys)
-	local result = {"tcode"}
-	for _, k in ipairs(keys) do
-		local value = tostring(attributes[k]):gsub("^#", "")
-		table.insert(result, k.."_"..value)
+	local result = {HIGHLIGHT_NAME_PREFIX}
+	if attributes.cterm then
+		table.insert(result, "c")
+		table.insert(result, attributes.cterm)
+	end
+	if attributes.ctermfg then
+		table.insert(result, "cfg")
+		table.insert(result, attributes.ctermfg)
+	end
+	if attributes.ctermbg then
+		table.insert(result, "cbg")
+		table.insert(result, attributes.ctermbg)
+	end
+	if attributes.gui then
+		table.insert(result, "g")
+		table.insert(result, attributes.gui)
+	end
+	if attributes.guifg then
+		table.insert(result, "gfg")
+		table.insert(result, (attributes.guifg:gsub("^#", "")))
+	end
+	if attributes.guibg then
+		table.insert(result, "gbg")
+		table.insert(result, (attributes.guibg:gsub("^#", "")))
 	end
 	return table.concat(result, "_")
+end
+
+local highlight_cache = {}
+
+-- Ref: https://stackoverflow.com/questions/1252539/most-efficient-way-to-determine-if-a-lua-table-is-empty-contains-no-entries
+local function table_is_empty(t)
+	return next(t) == nil
+end
+
+local function create_highlight(attributes)
+	if table_is_empty(attributes) then
+		return "Normal"
+	end
+	local highlight_name = make_highlight_name(attributes)
+	-- Look up in our cache.
+	if not highlight_cache[highlight_name] then
+	-- if nvim.fn.hlID(highlight_name) == 0 then
+		-- Create the highlight
+		nvim.ex.highlight(highlight_name, unpack(format_attributes(attributes)))
+		highlight_cache[highlight_name] = true
+	end
+	return highlight_name
 end
 
 --- Highlight a region in a buffer from the attributes specified
 local function highlight_from_attributes(buf, ns, current_attributes,
 		 region_line_start, region_byte_start,
 		 region_line_end, region_byte_end)
-	local highlightName
-	-- Ref: https://stackoverflow.com/questions/1252539/most-efficient-way-to-determine-if-a-lua-table-is-empty-contains-no-entries
-	if next(current_attributes) == nil then
-		highlightName = "Normal"
-	else
-		highlightName = make_highlight_name(current_attributes)
-		if nvim.fn.hlID(highlightName) == 0 then
-			nvim.ex.highlight(highlightName, unpack(format_attributes(current_attributes)))
-		end
-	end
-	-- nvim.echo(((vim.inspect{highlightName, {region_line_start, region_byte_start}, {region_line_end, region_byte_end}, current_attributes}):gsub("\n", "")))
+	-- TODO should I bother with highlighting normal regions?
+	local highlight_name = create_highlight(current_attributes)
 	if region_line_start == region_line_end then
-		nvim.buf_add_highlight(buf, ns, highlightName, region_line_start, region_byte_start, region_byte_end)
+		nvim.buf_add_highlight(buf, ns, highlight_name, region_line_start, region_byte_start, region_byte_end)
 	else
-		nvim.buf_add_highlight(buf, ns, highlightName, region_line_start, region_byte_start, -1)
+		nvim.buf_add_highlight(buf, ns, highlight_name, region_line_start, region_byte_start, -1)
 		for linenum = region_line_start + 1, region_line_end - 1 do
-			nvim.buf_add_highlight(buf, ns, highlightName, linenum, 0, -1)
+			nvim.buf_add_highlight(buf, ns, highlight_name, linenum, 0, -1)
 		end
-		nvim.buf_add_highlight(buf, ns, highlightName, region_line_end, 0, region_byte_end)
+		nvim.buf_add_highlight(buf, ns, highlight_name, region_line_end, 0, region_byte_end)
 	end
 end
 
--- Parse a color code
+--- Parse a color code inner
 -- Either an RGB code or an incremental list of other CSI codes.
 local function parse_color_code(code, current_attributes)
 	if code:match("^[34]8[:;]5[:;]") then
@@ -141,27 +175,52 @@ local function parse_color_code(code, current_attributes)
 	return current_attributes
 end
 
--- Algorithm overview:
--- Maintain an attributes object which contains the currently applicable
--- style to apply based on the incremental definitions from CSI codes.
---
--- 1. Start with a bare attributes object which represents a Normal style.
--- 2. Scan for the next CSI color code.
--- 3. Apply a highlight on the region between the last CSI code and this new
--- one. based on the current attributes.
--- 4. Update the current attributes with those defined by the new CSI code.
--- 5. Repeat from 2
---
--- TODO it's possible to skip processing the new code if the attributes hasn't
--- changed.
---
--- line_start: integer. should be 0-indexed
--- lines: array[string]. the lines to highlight from the buffer.
--- ns: integer. the namespace id. Create it with vim.api.create_namespace
--- buf: integer. buffer id.
+--- Default namespace used in `highlight_buffer` and `attach_to_buffer`.
+-- The name is "terminal_highlight"
+-- @see highlight_buffer
+-- @see attach_to_buffer
+local DEFAULT_NAMESPACE = nvim.create_namespace 'terminal_highlight'
+
+--[[-- Highlight the buffer region.
+Highlight starting from `line_start` (0-indexed) for each line described by `lines` in the
+buffer `buf` and attach it to the namespace `ns`.
+
+@usage
+-- Re-highlights the current buffer
+local terminal = require 'terminal'
+-- Clear existing highlight
+vim.api.nvim_buf_clear_namespace(buf, terminal.DEFAULT_NAMESPACE, 0, -1)
+local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+terminal.highlight_buffer(0, nil, lines, 0)
+
+@usage
+local function rehighlight_region(buf, line_start, line_end)
+  local ns = terminal.DEFAULT_NAMESPACE
+  vim.api.nvim_buf_clear_namespace(buf, ns, line_start, line_end)
+  local lines = vim.api.nvim_buf_get_lines(0, line_start, line_end, false)
+  terminal.highlight_buffer(0, nil, lines, line_start)
+end
+
+@tparam integer buf buffer id.
+@tparam[opt=DEFAULT_NAMESPACE] integer ns the namespace id. Create it with `vim.api.create_namespace`
+@tparam {string,...} lines the lines to highlight from the buffer.
+@tparam integer line_start should be 0-indexed
+]]
 local function highlight_buffer(buf, ns, lines, line_start)
+	ns = ns or DEFAULT_NAMESPACE
+	-- Algorithm overview:
+	-- Maintain an attributes object which contains the currently applicable
+	-- style to apply based on the incremental definitions from CSI codes.
+	--
+	-- 1. Start with a bare attributes object which represents a Normal style.
+	-- 2. Scan for the next CSI color code.
+	-- 3. Apply a highlight on the region between the last CSI code and this new
+	-- one. based on the current attributes.
+	-- 4. Update the current attributes with those defined by the new CSI code.
+	-- 5. Repeat from 2
 	local current_region_start, current_attributes = nil, nil
 	for current_linenum, line in ipairs(lines) do
+		-- @todo it's possible to skip processing the new code if the attributes hasn't changed.
 		current_linenum = current_linenum - 1 + line_start
 		-- Scan for potential color codes.
 		for match_start, code, match_end in line:gmatch("()%[([%d;:]+)m()") do
@@ -183,9 +242,12 @@ local function highlight_buffer(buf, ns, lines, line_start)
 	end
 end
 
--- buf = 0 implies the current buffer.
+--- Attach to a buffer and continuously highlight changes.
+-- @tparam integer buf A value of 0 implies the current buffer.
+-- @see highlight_buffer
 local function attach_to_buffer(buf)
-	local ns = nvim.create_namespace 'terminal_highlight'
+	local ns = DEFAULT_NAMESPACE
+--	local ns = nvim.create_namespace 'terminal_highlight'
 	do
 		nvim.buf_clear_namespace(buf, ns, 0, -1)
 		local lines = nvim.buf_get_lines(buf, 0, -1, true)
@@ -207,16 +269,34 @@ local function attach_to_buffer(buf)
 	})
 end
 
+--- Easy to use function if you want the full setup without fine grained control.
+-- Establishes an autocmd for `FileType terminal`
+-- @usage require'terminal'.setup()
+local function setup()
+	function TERMINAL_SETUP_HOOK()
+		nvim.win_set_option(0, 'concealcursor', 'nc')
+		attach_to_buffer(nvim.get_current_buf())
+	end
+	nvim.ex.augroup("TerminalSetup")
+	nvim.ex.autocmd_()
+	nvim.ex.autocmd("FileType terminal lua TERMINAL_SETUP_HOOK()")
+	nvim.ex.augroup("END")
+end
+
+--- @export
 return {
-	highlight_buffer = highlight_buffer;
+	DEFAULT_NAMESPACE = DEFAULT_NAMESPACE;
+	setup = setup;
 	attach_to_buffer = attach_to_buffer;
+	highlight_buffer = highlight_buffer;
 }
 
---[[ Example]]
---[=[
+--[=[ Example:
+```lua
 local buf = 1
 local ns = nvim.create_namespace("terminal_highlight")
 nvim.buf_clear_namespace(buf, ns, 0, -1)
 local lines = nvim.buf_get_lines(buf, 1, -1, false)
 require'terminal'.highlight_buffer(buf, ns, lines, 0)
---]=]
+```
+]=]

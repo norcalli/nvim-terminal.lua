@@ -1,0 +1,53 @@
+*terminal.lua* Provides terminal mode and highlighting of ANSI codes.
+
+Author: Ashkan Kiani <from-nvim-terminal.lua@kiani.io>
+
+==============================================================================
+INTRODUCTION                                       *terminal-lua-introduction*
+
+==============================================================================
+QUICK START                                          *terminal-lua-quickstart*
+
+Establish the autocmd for the |FileType| |terminal|
+>
+  lua require 'terminal'.setup
+<
+==============================================================================
+LUA API DEFINITION                                          *terminal-lua-api*
+
+Assumes the module is imported as `terminal`
+
+terminal.highlight_buffer                          *terminal.highlight_buffer*
+
+Highlight starting from `line_start` (0-indexed) for each line described by `lines` in the
+buffer `buf` and attach it to the namespace `ns`.
+
+parameters:
+	buf	 buffer id.
+	ns	 the namespace id. Create it with `vim.api.create_namespace`
+	lines	 the lines to highlight from the buffer.
+	line_start	 should be 0-indexed
+>
+  terminal.highlight_buffer(buf[, ns=DEFAULT_NAMESPACE], lines, line_start)
+<
+
+terminal.attach_to_buffer                          *terminal.attach_to_buffer*
+
+Attach to a buffer and continuously highlight changes.
+
+parameters:
+	buf	 A value of 0 implies the current buffer.
+>
+  terminal.attach_to_buffer(buf)
+<
+
+terminal.setup                                               *terminal.setup*
+
+Easy to use function if you want the full setup without fine grained control.
+Establishes an autocmd for `FileType terminal`
+>
+  " In your VIMRC
+  lua require'terminal'.setup()
+<
+
+ vim:tw=78:ts=8:noet:ft=help:norl:
