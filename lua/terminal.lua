@@ -264,7 +264,7 @@ local function highlight_buffer(buf, ns, lines, line_start, rgb_color_table)
 		-- @todo it's possible to skip processing the new code if the attributes hasn't changed.
 		current_linenum = current_linenum - 1 + line_start
 		-- Scan for potential color codes.
-		for match_start, code, match_end in line:gmatch("()%[([%d;:]+)m()") do
+		for match_start, code, _ in line:gmatch("()%[([%d;:]+)m()") do
 			-- Highlight any current region.
 			if current_region_start then
 				highlight_from_attributes(buf, ns, current_attributes,
@@ -287,8 +287,7 @@ end
 -- @tparam integer buf A value of 0 implies the current buffer.
 -- @tparam[opt=initialize_terminal_colors()] {[number]=string} rgb_color_table cterm color RGB lookup table
 -- @see highlight_buffer
-local function attach_to_buffer(buf, rgb_color_table)
-	rgb_color_table = rgb_color_table or initialize_terminal_colors()
+local function attach_to_buffer(buf)
 	local ns = DEFAULT_NAMESPACE
 --	local ns = nvim.create_namespace 'terminal_highlight'
 	do
@@ -298,16 +297,16 @@ local function attach_to_buffer(buf, rgb_color_table)
 	end
 	-- send_buffer: true doesn't actually do anything in Lua (yet)
 	nvim.buf_attach(buf, false, {
-		on_lines = function(event_type, buf, changed_tick, firstline, lastline, new_lastline)
+		on_lines = function(_event_type, buf_, _changed_tick, _firstline, _lastline, _new_lastline)
 			-- TODO I don't think there's a way around this. Codes are affected by
 			-- everything before and affect things after. You could do more
 			-- intelligence analysis by only parsing up until the last affected
 			-- values, but that's complicated.
-			firstline = 0
-			new_lastline = -1
-			nvim.buf_clear_namespace(buf, ns, firstline, new_lastline)
-			local lines = nvim.buf_get_lines(buf, firstline, new_lastline, true)
-			highlight_buffer(buf, ns, lines, firstline)
+			local firstline = 0
+			local new_lastline = -1
+			nvim.buf_clear_namespace(buf_, ns, firstline, new_lastline)
+			local lines = nvim.buf_get_lines(buf_, firstline, new_lastline, true)
+			highlight_buffer(buf_, ns, lines, firstline)
 		end;
 	})
 end
