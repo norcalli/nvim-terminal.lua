@@ -22,7 +22,7 @@ Assumes the module is imported as `terminal`
 Easy to use function if you want the full setup without fine grained control.
 Establishes an autocmd for `FileType terminal` .
 
-Also sets |'nowrap'|and |'concealcursor'|="nc"
+Also sets |'nowrap'|and |'conceallevel'|=2
 
 PARAMETERS:
 	`rgb_color_table`	 (optional) cterm color RGB lookup table
