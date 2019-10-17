@@ -319,7 +319,7 @@ end
 local function setup(rgb_color_table)
 	rgb_color_table = rgb_color_table or initialize_terminal_colors()
 	function TERMINAL_SETUP_HOOK()
-		nvim.win_set_option(0, 'concealcursor', 'nc')
+		nvim.win_set_option(0, 'conceallevel', 2)
 		nvim.win_set_option(0, 'wrap', false)
 		attach_to_buffer(nvim.get_current_buf(), rgb_color_table)
 	end
