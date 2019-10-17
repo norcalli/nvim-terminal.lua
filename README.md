@@ -29,6 +29,8 @@ lua require'terminal'.setup()
 
 Then you can just `setl filetype=terminal` to activate the mode.
 
+**NOTE:** If you want to completely hide the color codes, you can use `concealcursor` (`:h concealcursor`) to that effect. Setting it to `setl concealcursor=nc` would hide the codes until you went into visual mode or insert mode. **This may make it seem like the cursor is lagging when you are travelling over text, but the cursor doesn't move if it is over hidden codes**, so be aware of that effect.
+
 For more advanced usage, see the [Luadoc documentation](https://norcalli.github.io/luadoc/nvim-terminal.lua/)
 or use `:h terminal.lua` once installed.
 
