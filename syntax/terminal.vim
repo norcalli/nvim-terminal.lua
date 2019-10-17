@@ -9,9 +9,10 @@ elseif exists("b:current_syntax")
     finish
 endif
 
-" Simple syntax highlighting for UnicodeTable command {{{2
-syn match TerminalCSIColorCode1 /\[\d\+m/ conceal
-syn match TerminalCSIColorCode2 /\[\d\+;\d\+m/ conceal
+" I've been debating whether or not to enumerate the possibilities or just hide
+" them all with ^[\[[0-9:;]*m, because it might overshadow cases I don't cover,
+" but I think that concealing anyway is a good idea.
+syn match TerminalCSIColorCode /\[[:;0-9]*m/ conceal
 
 " Set the syntax variable
 let b:current_syntax="terminal"
