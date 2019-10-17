@@ -192,22 +192,68 @@ end
 --- Parse a color code inner
 -- Either an RGB code or an incremental list of other CSI codes.
 local function parse_color_code(rgb_color_table, code, current_attributes)
-	if code:match("^[34]8[:;]5[:;]") then
-		local kind, sep1, sep2, n = code:match("^([34])8([:;])5([:;])(%d+)$")
-		-- TODO do this better
-		assert(sep1 == sep2)
-		local ctermnr = tonumber(n)
-		current_attributes[kind == "3" and "ctermfg" or "ctermbg"] = ctermnr
-		current_attributes[kind == "3" and "guifg" or "guibg"] = rgb_color_table[ctermnr]
-	elseif code:match("^[34]8[:;]2[:;]") then
-		local kind, sep1, sep2, r, sep3, g, sep4, b = code:match("^([34])8([:;])2([:;])(%d+)([:;])(%d+)([:;])(%d+)$")
-		-- TODO do this better
-		assert(sep1 == sep2 and sep1 == sep3 and sep1 == sep4)
-		-- TODO confirm that r,g,b are in the correct format.
-		current_attributes[kind == "3" and "guifg" or "guibg"] = "#"..r..g..b
-	else
-		local parts = vim.split(code, ";", true)
-		current_attributes = resolve_attributes(rgb_color_table, parts, current_attributes)
+	-- CSI m is equivalent to CSI 0 m, which is Reset, which means null the attributes
+	if #code == 0 then
+		return {}
+	end
+	-- TODO(ashkan) I haven't fully settled on how to handle invalid attributes found here.
+	-- Currently, I'm going to accept the valid subsets and ignore the others.
+	local find_start = 1
+	while find_start <= #code do
+		local match_start, match_end = code:find(";", find_start, true)
+		local segment = code:sub(find_start, match_start and match_start-1)
+		-- Parse until the end.
+		if not match_start then
+			return resolve_attributes(rgb_color_table, {segment}, current_attributes)
+		end
+		do
+			if segment == "38" or segment == "48" then
+				local is_foreground = segment == "38"
+				-- Verify the segment start. The only possibilities are 2, 5
+				segment = code:sub(find_start+#"38", find_start + #"38;2;" - 1)
+				if segment == ";5;" or segment == ":5:" then
+					local color_segment = code:sub(find_start+#"38;2;"):match("^(%d+)")
+					-- We can skip this part and try to recover anything else after
+					-- or we could terminate early.
+					if not color_segment then
+						return
+					end
+					local ctermnr = tonumber(color_segment)
+					find_start = find_start + #"38;2;" + #color_segment + 1
+					if ctermnr > 255 then
+						-- Error. Skip past this part since the number isn't valid.
+					elseif is_foreground then
+						current_attributes.ctermfg = ctermnr
+						current_attributes.guifg = rgb_color_table[ctermnr]
+					else
+						current_attributes.ctermbg = ctermnr
+						current_attributes.guibg = rgb_color_table[ctermnr]
+					end
+				elseif segment == ";2;" or segment == ":2:" then
+					local separator = segment:sub(1,1)
+					local r, g, b, len = code:sub(find_start+#"38;2;"):match("^(%d+)"..separator.."(%d+)"..separator.."(%d+)()")
+					-- We can skip this part and try to recover anything else after
+					-- or we could terminate early.
+					if not r then
+						return
+					end
+					r, g, b = tonumber(r), tonumber(g), tonumber(b)
+					find_start = find_start + #"38;2;" + len
+					if r > 255 or g > 255 or b > 255 then
+						-- Invalid values, skip.
+					else
+						current_attributes[is_foreground and "guifg" or "guibg"] = rgb_to_hex(r,g,b)
+					end
+				else
+					-- this is an error, so we're going to terminate early
+					-- TODO make sure this is what you want to do.
+					return current_attributes
+				end
+			else
+				find_start = match_end+1
+				current_attributes = resolve_attributes(rgb_color_table, {segment}, current_attributes)
+			end
+		end
 	end
 	return current_attributes
 end
@@ -327,6 +373,59 @@ local function setup(rgb_color_table)
 	nvim.ex.autocmd_()
 	nvim.ex.autocmd("FileType terminal lua TERMINAL_SETUP_HOOK()")
 	nvim.ex.augroup("END")
+end
+
+local function test_parse()
+	local function assert_eq(a,b, message)
+		local result = a == b
+		if not result then
+			assert(false, (message or "")..("%s != %s"):format(vim.inspect(a), vim.inspect(b)))
+		end
+	end
+	local rgb_color_table = initialize_terminal_colors()
+	local tests = {
+		["0;38;5;100"] = table_is_empty;
+		["1;33"]       = resolve_attributes(rgb_color_table, {1,33}, {});
+		["1;38;5;100"] = { cterm = 'bold'; ctermfg = 100; guifg = rgb_color_table[100]; };
+		["1;38;5;3"]   = resolve_attributes(rgb_color_table, {1,33}, {});
+		["1;48;5;3"]   = resolve_attributes(rgb_color_table, {1,43}, {});
+		["30"]         = resolve_attributes(rgb_color_table, {30}, {});
+		["30"]         = resolve_attributes(rgb_color_table, {30}, {});
+		["38;123;432"] = table_is_empty;
+		["38;5;100;0"] = table_is_empty; -- TODO is this really correct?
+		["38;5;100;1"] = { cterm = 'bold'; ctermfg = 100; guifg = rgb_color_table[100]; };
+		["38;5;100"]   = { ctermfg = 100; guifg = rgb_color_table[100]; };
+		["38;5;3"]     = resolve_attributes(rgb_color_table, {33}, {});
+		["38;5;543"]   = table_is_empty;
+		["48;5;100"]   = { ctermbg = 100; guibg = rgb_color_table[100]; };
+	}
+	for r = 0, 355, 100 do
+		for g = 0, 355, 100 do
+			for b = 0, 355, 100 do
+				local key = "38;2;"..table.concat({r,g,b}, ';')
+				if r > 255 or g > 255 or b > 255 then
+					tests[key] = table_is_empty
+				else
+					tests[key] = { guifg = rgb_to_hex(r,g,b); }
+				end
+			end
+		end
+	end
+
+	for input, value in pairs(tests) do
+		local result = parse_color_code(rgb_color_table, input, {})
+		if type(value) == 'function' then
+			assert(result, input)
+		elseif type(value) == 'table' then
+			local message = ("input=%q: "):format(input)
+			assert_eq(type(result), 'table', message)
+			for k, v in pairs(value) do
+				assert_eq(result[k], v, k.."="..v.."; "..message)
+			end
+		else
+			assert_eq(value, result, ("input=%q: "):format(input))
+		end
+	end
 end
 
 --- @export
