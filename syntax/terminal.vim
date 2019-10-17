@@ -11,7 +11,7 @@ endif
 
 " Simple syntax highlighting for UnicodeTable command {{{2
 syn match TerminalCSIColorCode1 /\[\d\+m/ conceal
-syn match TerminalCSIColorCode2 /\[\d\+;\d\+m/ conceal
+syn match TerminalCSIColorCode2 /\[\d\+\(;\d\+\)\+m/ conceal
 
 " Set the syntax variable
 let b:current_syntax="terminal"
