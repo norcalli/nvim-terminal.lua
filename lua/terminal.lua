@@ -310,7 +310,7 @@ local function highlight_buffer(buf, ns, lines, line_start, rgb_color_table)
 		-- @todo it's possible to skip processing the new code if the attributes hasn't changed.
 		current_linenum = current_linenum - 1 + line_start
 		-- Scan for potential color codes.
-		for match_start, code, match_end in line:gmatch("()%[([%d;:]+)m()") do
+		for match_start, code, match_end in line:gmatch("()%[([%d;:]*)m()") do
 			-- Highlight any current region.
 			if current_region_start then
 				highlight_from_attributes(buf, ns, current_attributes,
@@ -319,7 +319,7 @@ local function highlight_buffer(buf, ns, lines, line_start, rgb_color_table)
 			end
 			current_region_start = {current_linenum, match_start}
 			-- Update attributes from the new escape code.
-			current_attributes = parse_color_code(rgb_color_table, code, current_attributes)
+			current_attributes = parse_color_code(rgb_color_table, code, current_attributes) or current_attributes
 		end
 	end
 	if current_region_start then
