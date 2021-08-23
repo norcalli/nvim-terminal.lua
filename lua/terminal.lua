@@ -200,7 +200,7 @@ local function parse_color_code(rgb_color_table, code, current_attributes)
 	-- Currently, I'm going to accept the valid subsets and ignore the others.
 	local find_start = 1
 	while find_start <= #code do
-		local match_start, match_end = code:find(";", find_start, true)
+		local match_start, match_end = code:find("[;:]", find_start)
 		local segment = code:sub(find_start, match_start and match_start-1)
 		-- Parse until the end.
 		if not match_start then
