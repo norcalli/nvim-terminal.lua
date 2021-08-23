@@ -173,19 +173,27 @@ local function create_highlight(attributes)
 end
 
 --- Highlight a region in a buffer from the attributes specified
-local function highlight_from_attributes(buf, ns, current_attributes,
-		 region_line_start, region_byte_start,
-		 region_line_end, region_byte_end)
+local function highlight_from_attributes(buf, ns, current_attributes, start_line, start_byte, end_line, end_byte)
 	-- TODO should I bother with highlighting normal regions?
 	local highlight_name = create_highlight(current_attributes)
-	if region_line_start == region_line_end then
-		nvim.buf_add_highlight(buf, ns, highlight_name, region_line_start, region_byte_start, region_byte_end)
+
+	local function highlight_line_region(line, column_start, column_end)
+		nvim.buf_add_highlight(buf, ns, highlight_name, line, column_start, column_end)
+	end
+
+	if start_line == end_line then
+		highlight_line_region(start_line, start_byte, end_byte)
 	else
-		nvim.buf_add_highlight(buf, ns, highlight_name, region_line_start, region_byte_start, -1)
-		for linenum = region_line_start + 1, region_line_end - 1 do
-			nvim.buf_add_highlight(buf, ns, highlight_name, linenum, 0, -1)
+		local start_of_line = 0
+		local end_of_line = -1
+
+		highlight_line_region(start_line, start_byte, end_of_line)
+
+		for linenum = start_line + 1, end_line - 1 do
+			highlight_line_region(linenum, start_of_line, end_of_line)
 		end
-		nvim.buf_add_highlight(buf, ns, highlight_name, region_line_end, 0, region_byte_end)
+
+		highlight_line_region(end_line, start_of_line, end_byte)
 	end
 end
 
