@@ -340,7 +340,7 @@ local function attach_to_buffer(buf, rgb_color_table)
 	do
 		nvim.buf_clear_namespace(buf, ns, 0, -1)
 		local lines = nvim.buf_get_lines(buf, 0, -1, true)
-		highlight_buffer(buf, ns, lines, 0)
+		highlight_buffer(buf, ns, lines, 0, rgb_color_table)
 	end
 	-- send_buffer: true doesn't actually do anything in Lua (yet)
 	nvim.buf_attach(buf, false, {
@@ -353,7 +353,7 @@ local function attach_to_buffer(buf, rgb_color_table)
 			new_lastline = -1
 			nvim.buf_clear_namespace(buf, ns, firstline, new_lastline)
 			local lines = nvim.buf_get_lines(buf, firstline, new_lastline, true)
-			highlight_buffer(buf, ns, lines, firstline)
+			highlight_buffer(buf, ns, lines, firstline, rgb_color_table)
 		end;
 	})
 end
