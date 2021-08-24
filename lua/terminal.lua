@@ -54,6 +54,38 @@ local function initialize_terminal_colors()
 	return result
 end
 
+--- Extracts currently active (set to true) attributes
+-- @tparam {[string]=bool} attributes states
+-- @treturn {string,...} array of active attributes
+local function get_active_attributes(attributes)
+	attributes = attributes or {}
+
+	local result = {}
+	for k, v in pairs(attributes) do
+		if v == true then
+			table.insert(result, k)
+		end
+	end
+	return result
+end
+
+--- Turns a attributes table into a delimited list
+-- @tparam {[string]=bool} attributes table of each attribute's state
+-- @tparam[opt=','] string delim value used as list delimiter
+-- @treturn string list of attributes or NONE if attributes were empty
+local function get_attribute_list(attributes, delim)
+	attributes = attributes or {}
+	delim = delim or ','
+
+	local result = table.concat(get_active_attributes(attributes), delim)
+
+	if result == '' then
+		result = 'NONE'
+	end
+
+	return result
+end
+
 --- Parses a list of codes into an object of cterm/gui attributes
 -- @tparam {[number]=string} rgb_color_table cterm color RGB lookup table
 -- @tparam {string|int,...} attrs the list of codes numbers like 0 from ^[[0m
@@ -64,7 +96,6 @@ local function resolve_attributes(rgb_color_table, attrs, attributes)
 	for _, v in ipairs(attrs) do
 		v = tonumber(v)
 		-- @todo The color codes implemented is not complete
-		-- @todo cterm and gui can have multiple values for italics/things other than bold.
 		if not v then
 			-- TODO print warning here? It might be spammy.
 			-- nvim.err_writeln("Invalid mode encountered")
@@ -88,9 +119,6 @@ local function resolve_attributes(rgb_color_table, attrs, attributes)
 			local ctermbg = v-100+8
 			attributes.ctermbg = ctermbg
 			attributes.guibg = rgb_color_table[ctermbg]
-		elseif v == 22 then
-			attributes.cterm = 'NONE'
-			attributes.gui = 'NONE'
 		elseif v == 39 then
 			-- Reset to normal color for foreground
 			attributes.ctermfg = 'fg'
@@ -99,9 +127,41 @@ local function resolve_attributes(rgb_color_table, attrs, attributes)
 			-- Reset to normal color for background
 			attributes.ctermbg = 'bg'
 			attributes.guibg = 'bg'
-		elseif v == 1 then
-			attributes.cterm = 'bold'
-			attributes.gui = 'bold'
+		elseif v >= 1 and v <= 29 then
+			attributes.cterm = attributes.cterm or {}
+			attributes.gui = attributes.gui or {}
+
+			if v == 9 then
+				attributes.cterm.strikethrough = true
+				attributes.gui.strikethrough = true
+			elseif v == 29 then
+				attributes.cterm.strikethrough = false
+				attributes.gui.strikethrough = false
+			elseif v == 7 then
+				attributes.cterm.reverse = true
+				attributes.gui.reverse = true
+			elseif v == 27 then
+				attributes.cterm.reverse = false
+				attributes.gui.reverse = false
+			elseif v == 4 then
+				attributes.cterm.underline = true
+				attributes.gui.underline = true
+			elseif v == 24 then
+				attributes.cterm.underline = false
+				attributes.gui.underline = false
+			elseif v == 3 then
+				attributes.cterm.italic = true
+				attributes.gui.italic = true
+			elseif v == 23 then
+				attributes.cterm.italic = false
+				attributes.gui.italic = false
+			elseif v == 1 then
+				attributes.cterm.bold = true
+				attributes.gui.bold = true
+			elseif v == 22 then
+				attributes.cterm.bold = false
+				attributes.gui.bold = false
+			end
 		elseif v == 0 then
 			-- RESET
 			attributes = {}
@@ -113,7 +173,11 @@ end
 local function format_attributes(attributes)
 	local result = {}
 	for k, v in pairs(attributes) do
-		table.insert(result, k.."="..v)
+		if type(v) == "string" then
+			table.insert(result, k.."="..v)
+		elseif type(v) == "table" then
+			table.insert(result, k.."="..get_attribute_list(v))
+		end
 	end
 	return result
 end
@@ -125,7 +189,7 @@ local function make_highlight_name(attributes)
 	local result = {HIGHLIGHT_NAME_PREFIX}
 	if attributes.cterm then
 		table.insert(result, "c")
-		table.insert(result, attributes.cterm)
+		table.insert(result, get_attribute_list(attributes.cterm, '_'))
 	end
 	if attributes.ctermfg then
 		table.insert(result, "cfg")
@@ -137,7 +201,7 @@ local function make_highlight_name(attributes)
 	end
 	if attributes.gui then
 		table.insert(result, "g")
-		table.insert(result, attributes.gui)
+		table.insert(result, get_attribute_list(attributes.gui, '_'))
 	end
 	if attributes.guifg then
 		table.insert(result, "gfg")
@@ -394,14 +458,14 @@ local function test_parse()
 	local tests = {
 		["0;38;5;100"] = table_is_empty;
 		["1;33"]       = resolve_attributes(rgb_color_table, {1,33}, {});
-		["1;38;5;100"] = { cterm = 'bold'; ctermfg = 100; guifg = rgb_color_table[100]; };
+		["1;38;5;100"] = { cterm = { ['bold'] = true }; ctermfg = 100; guifg = rgb_color_table[100]; };
 		["1;38;5;3"]   = resolve_attributes(rgb_color_table, {1,33}, {});
 		["1;48;5;3"]   = resolve_attributes(rgb_color_table, {1,43}, {});
 		["30"]         = resolve_attributes(rgb_color_table, {30}, {});
 		["30"]         = resolve_attributes(rgb_color_table, {30}, {});
 		["38;123;432"] = table_is_empty;
 		["38;5;100;0"] = table_is_empty; -- TODO is this really correct?
-		["38;5;100;1"] = { cterm = 'bold'; ctermfg = 100; guifg = rgb_color_table[100]; };
+		["38;5;100;1"] = { cterm = { ['bold'] = true }; ctermfg = 100; guifg = rgb_color_table[100]; };
 		["38;5;100"]   = { ctermfg = 100; guifg = rgb_color_table[100]; };
 		["38;5;3"]     = resolve_attributes(rgb_color_table, {33}, {});
 		["38;5;543"]   = table_is_empty;
