@@ -414,6 +414,12 @@ local function attach_to_buffer(buf, rgb_color_table)
 		local lines = nvim.buf_get_lines(buf, 0, -1, true)
 		highlight_buffer(buf, ns, lines, 0, rgb_color_table)
 	end
+
+	-- remove the limit on syntax highlighting long lines
+	-- without this lines that are longer then the default value
+	-- stop being hidden with conceal leaking terminal escape codes
+	nvim.buf_set_option(buf, 'synmaxcol', 0)
+
 	-- send_buffer: true doesn't actually do anything in Lua (yet)
 	nvim.buf_attach(buf, false, {
 		on_lines = function(event_type, buf, changed_tick, firstline, lastline, new_lastline)
