@@ -34,6 +34,8 @@ Then you can just `setl filetype=terminal` to activate the mode.
 For more advanced usage, see the [Luadoc documentation](https://norcalli.github.io/luadoc/nvim-terminal.lua/)
 or use `:h terminal.lua` once installed.
 
+See also the built-in neovim function `:help nvim_open_term()` with similar functionality.
+
 
 ## TODO
 
