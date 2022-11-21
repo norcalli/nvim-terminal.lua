@@ -1,6 +1,6 @@
 --- Highlights terminal CSI ANSI color codes.
 -- @module terminal
-local nvim = require 'nvim'
+local nvim = require 'terminal.nvim'
 
 local function rgb_to_hex(r,g,b)
 	return ("#%02X%02X%02X"):format(r,g,b)
@@ -39,7 +39,7 @@ local function initialize_terminal_colors()
 		result[i] = cterm_colors[i]
 	end
 	-- g:terminal_color_n overrides
-	if nvim.o.termguicolors then
+	if vim.o.termguicolors then
 		-- TODO only do 16 colors?
 		for i = 0, 255 do
 			local status, value = pcall(vim.api.nvim_get_var, 'terminal_color_'..i)
@@ -365,8 +365,8 @@ end
 local function setup(rgb_color_table)
 	rgb_color_table = rgb_color_table or initialize_terminal_colors()
 	function TERMINAL_SETUP_HOOK()
-		nvim.win_set_option(0, 'conceallevel', 2)
-		nvim.win_set_option(0, 'wrap', false)
+		vim.wo.conceallevel = 2
+		vim.wo.wrap = false
 		attach_to_buffer(nvim.get_current_buf(), rgb_color_table)
 	end
 	nvim.ex.augroup("TerminalSetup")
